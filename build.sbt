@@ -1,15 +1,12 @@
-name := """play-scala"""
+name := """Beacon Server"""
 
-version := "1.0-SNAPSHOT"
+version := "0.0.2-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 scalaVersion := "2.11.7"
 
 libraryDependencies ++= Seq(
-  jdbc,
-  cache,
-  ws,
   "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test
 )
 
