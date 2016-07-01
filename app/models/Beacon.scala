@@ -5,39 +5,37 @@ import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONDocumentReader
 import reactivemongo.bson.BSONDocumentWriter
 
-import java.util.Date
-
 case class Beacon(
-  creator: String,
-  title: String,
-  location: Point,
-  startTime: Long,
-  endTime: Long,
-  range: Double,
-  placeName: String,
   address: String,
-  tags: List[String],
+  creator: String,
+  endTime: Long,
+  location: Point,
   notifiedCount: Int,
   notitifiedUsers: List[String]
+  placeName: String,
+  range: Double,
+  startTime: Long,
+  tags: List[String],
+  title: String,
 )
 
 object Beacon {
   implicit object BeaconReader extends BSONDocumentReader[Beacon] {
     def read(bson: BSONDocument): Beacon = {
       val opt: Option[Beacon] = for {
-        creator <- bson.getAs[String]("creator")
-        title <- bson.getAs[String]("title")
-        location <- bson.getAs[Point]("location")
-        startTime <- bson.getAs[Long]("startTime")
-        endTime <- bson.getAs[Long]("endTime")
-        range <- bson.getAs[Double]("range")
-        placeName <- bson.getAs[String]("placeName")
         address <- bson.getAs[String]("address")
-        tags <- bson.getAs[List[String]]("tags")
+        creator <- bson.getAs[String]("creator")
+        endTime <- bson.getAs[Long]("endTime")
+        location <- bson.getAs[Point]("location")
         notifiedCount <- bson.getAs[Int]("notifiedCount")
         notifiedUsers <- bson.getAs[List[String]]("notifiedUsers")
-      } yield Beacon(creator, title, location, startTime, endTime, range,
-                     placeName, address, tags, notifiedCount, notifiedUsers)
+        placeName <- bson.getAs[String]("placeName")
+        range <- bson.getAs[Double]("range")
+        startTime <- bson.getAs[Long]("startTime")
+        tags <- bson.getAs[List[String]]("tags")
+        title <- bson.getAs[String]("title")
+      } yield Beacon(address, creator, endTime, location, notifiedCount,
+                     notifiedUsers, placeName, range, startTime, tags, title)
 
       opt.get
     }
@@ -45,17 +43,17 @@ object Beacon {
 
   implicit object BeaconWriter extends BSONDocumentWriter[Beacon] {
     def write(beacon: Beacon): BSONDocument = BSONDocument(
-      "creator" -> beacon.creator,
-      "title" -> beacon.title,
-      "location" -> beacon.location,
-      "startTime" -> beacon.startTime,
-      "endTime" -> beacon.endTime,
-      "range" -> beacon.range,
-      "placeName" -> beacon.placeName,
       "address" -> beacon.address,
-      "tags" -> BSONArray(beacon.tags),
+      "creator" -> beacon.creator,
+      "endTime" -> beacon.endTime,
+      "location" -> beacon.location,
       "notifiedCount" -> beacon.notifiedCount,
-      "notifiedUsers" -> BSONArray(beacon.notitifiedUsers)
+      "notifiedUsers" -> BSONArray(beacon.notitifiedUsers),
+      "placeName" -> beacon.placeName,
+      "range" -> beacon.range,
+      "startTime" -> beacon.startTime,
+      "tags" -> BSONArray(beacon.tags),
+      "title" -> beacon.title
     )
   }
 }
