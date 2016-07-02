@@ -11,12 +11,12 @@ case class Beacon(
   endTime: Long,
   location: Point,
   notifiedCount: Int,
-  notitifiedUsers: List[String]
+  notitifiedUsers: List[String],
   placeName: String,
   range: Double,
   startTime: Long,
   tags: List[String],
-  title: String,
+  title: String
 )
 
 object Beacon {
