@@ -1,4 +1,4 @@
-package controllers
+package com.beacon.controllers
 
 import play.api.Configuration
 import play.api.mvc.Action
