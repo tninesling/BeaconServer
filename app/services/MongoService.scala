@@ -1,4 +1,4 @@
-package com.beacon.services
+package services
 
 import javax.inject.Inject
 

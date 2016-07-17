@@ -1,6 +1,7 @@
-package com.beacon.controllers
+package controllers
 
 import models.Beacon
+
 import play.api.Configuration
 import play.api.libs.json.JsValue
 import play.api.mvc.Action

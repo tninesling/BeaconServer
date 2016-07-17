@@ -5,7 +5,12 @@ import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONDocumentReader
 import reactivemongo.bson.BSONDocumentWriter
 
-case class Point(lat: Double, lon: Double)
+case class Point(lat: Double, lon: Double) {
+  require(lat >= -90.0)
+  require(lat <= 90.0)
+  require(lon >= -180.0)
+  require(lon <= 180.0)
+}
 
 object Point {
   implicit object PointReader extends BSONDocumentReader[Point] {
