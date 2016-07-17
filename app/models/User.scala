@@ -7,6 +7,8 @@ import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONDocumentReader
 import reactivemongo.bson.BSONDocumentWriter
 
+import scala.util.matching.Regex
+
 case class User(
   // required
   createdAt: Date,
@@ -14,12 +16,19 @@ case class User(
   phoneNumber: String,
   updatedAt: Date,
   // optional
-  email: Option[String],
-  firstName: Option[String],
-  lastName: Option[String],
-  location: Option[Point],
-  username: Option[String]
-)
+  email: Option[String] = None,
+  firstName: Option[String] = None,
+  lastName: Option[String] = None,
+  location: Option[Point] = None,
+  username: Option[String] = None
+) {
+  /*val phoneNumberAcceptPattern = """\d{10}""".r
+  require(phoneNumber match {
+    case phoneNumberAcceptPattern => true
+    case _ => false
+  })*/
+  require(phoneNumber.matches("\\d{10}"))
+}
 
 object User {
   implicit object UserReader extends BSONDocumentReader[User] {
