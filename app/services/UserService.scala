@@ -18,7 +18,8 @@ import scala.concurrent.Future
 import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext.Implicits.global
 
-/** Provides CRUD operations for the User model
+/** Provides CRUD operations and authentication for the User model.
+  * Authentication is provided by the jBcrypt plugin
   */
 class UserService @Inject()(mongo: MongoService) {
   val users = Await.result(mongo.users, Duration.Inf)
@@ -133,7 +134,7 @@ class UserService @Inject()(mongo: MongoService) {
     * @param phoneNumber - the user's phone number
     * @param latitude - the user's latitude coordinate
     * @param longitude - the user's longitude coordinate
-    * @return
+    * @return A Future FindAndModifyResult for the update issued
     */
   def updateLocation(phoneNumber: String, latitude: Double, longitude: Double): Future[users.BatchCommands.FindAndModifyCommand.FindAndModifyResult] = {
     val user = BSONDocument("phoneNumber" -> phoneNumber)
