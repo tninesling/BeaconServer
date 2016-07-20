@@ -1,0 +1,12 @@
+@(userForm: Form[UserData])(implicit messages: Messages)
+
+@helper.form(action = routes.UserController.signup) {
+  @helper.inputText(userForm("phoneNumber"))
+  @helper.inputPassword(userForm("password"))
+  @helper.inputPassword(userForm("passwordConfirmation"))
+  @helper.inputText(userForm("email"))
+  @helper.inputText(userForm("firstName"))
+  @helper.inputText(userForm("lastName"))
+  @helper.inputText(userForm("username"))
+  <input type="submit" value="Submit">
+}

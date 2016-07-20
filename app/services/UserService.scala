@@ -9,6 +9,11 @@ import javax.inject.Inject
 
 import org.mindrot.jbcrypt.BCrypt
 
+import play.api.Configuration
+
+import reactivemongo.api.MongoConnection
+import reactivemongo.api.MongoDriver
+import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.Producer
@@ -21,8 +26,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 /** Provides CRUD operations and authentication for the User model.
   * Authentication is provided by the jBcrypt plugin
   */
-class UserService @Inject()(mongo: MongoService) {
-  val users = Await.result(mongo.users, Duration.Inf)
+class UserService @Inject()(config: Configuration, mongo: MongoService) {
+  lazy val users = Await.result(mongo.users, Duration.Inf)
 
   /** Authenticates a user based on a password attempt. Finds the user trying to
     * authenticate by phone number and then checks the passwordEntry against
@@ -62,6 +67,15 @@ class UserService @Inject()(mongo: MongoService) {
     val newUser: User = User(createdAt, phoneNumber, hashedPassword, updatedAt,
             email, firstName, lastName, location, username)
 
+    users.insert(newUser)
+  }
+
+  /** Saves a new User in the database from a preconstructed User object
+    *
+    * @param newUser - A User object to be inserted into the database
+    * @return A Future of the result of the insert
+    */
+  def create(newUser: User): Future[WriteResult] = {
     users.insert(newUser)
   }
 
@@ -143,3 +157,5 @@ class UserService @Inject()(mongo: MongoService) {
     users.findAndUpdate(user, newLocation)
   }
 }
+
+object UserService {} // companion object for UserService class. Only one UserService should be used
