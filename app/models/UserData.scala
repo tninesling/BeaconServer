@@ -8,8 +8,8 @@ case class UserData(
   passwordConfirmation: String,
   phoneNumber: String,
   // optional
-  email: String = null,
-  firstName: String = null,
-  lastName: String = null,
-  username: String = null
+  email: String = "",
+  firstName: String = "",
+  lastName: String = "",
+  username: String = ""
 )

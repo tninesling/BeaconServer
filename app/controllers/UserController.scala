@@ -35,7 +35,7 @@ class UserController @Inject()(val messagesApi: MessagesApi, userService: UserSe
       "password" -> nonEmptyText(8, Int.MaxValue),
       "passwordConfirmation" -> nonEmptyText(8, Int.MaxValue),
       "phoneNumber" -> nonEmptyText(10, 10),
-      "email" -> text,//email,
+      "email" -> text,
       "firstName" -> text,
       "lastName" -> text,
       "username" -> text
@@ -56,7 +56,7 @@ class UserController @Inject()(val messagesApi: MessagesApi, userService: UserSe
       userData => {
         // binding success, form is bound successfully
         userService.create(userData.phoneNumber, userData.password, userData.email,
-              userData.firstName, userData.lastName, null, userData.username)
+              userData.firstName, userData.lastName, new Point(0.0, 0.0), userData.username)
         Redirect(routes.HomeController.index).flashing("success" -> "User created")
       }
     )
@@ -67,9 +67,10 @@ class UserController @Inject()(val messagesApi: MessagesApi, userService: UserSe
   }
 
   def testFind = Action {
-    val testUser = User(new Date, "password", "5555555558", new Date, "email@email.com", "taylor", "ninesling", Point(35.0, 45.0), "t9sling")
-    userService.create(testUser)
-    val user = Await.result(userService.findByPhoneNumber("5555555558"), Duration.Inf)
+    //val testUser = User(new Date, "password", "5555555558", new Date, "email@email.com", "taylor", "ninesling", Point(35.0, 45.0), "t9sling")
+    //userService.create(testUser)
+    userService.create("5555555555", "password", "email@email.com", "first", "last", new Point(0.0, 0.0), "username")
+    val user = Await.result(userService.findByPhoneNumber("5555555555"), Duration.Inf)
     Ok(user.getOrElse("No user match").toString)
   }
 

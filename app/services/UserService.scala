@@ -16,6 +16,7 @@ import reactivemongo.api.MongoConnection
 import reactivemongo.api.MongoDriver
 import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.api.commands.WriteResult
+import reactivemongo.bson.BSONArray
 import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.Producer
 
@@ -60,9 +61,9 @@ class UserService @Inject()(config: Configuration, mongo: MongoService) {
     * @param username - the user's chosen username (optional)
     * @return A Future of the result of the insert
     */
-  def create(phoneNumber: String, password: String, email: String = null,
-        firstName: String = null, lastName: String = null, location: Point = null,
-        username: String = null): Future[WriteResult] = {
+  def create(phoneNumber: String, password: String, email: String = "",
+        firstName: String = "", lastName: String = "", location: Point = Point(0.0, 0.0),
+        username: String = ""): Future[WriteResult] = {
     val createdAt = new Date // current time
     val hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt)
     val updatedAt = new Date // current time
@@ -110,13 +111,30 @@ class UserService @Inject()(config: Configuration, mongo: MongoService) {
 
   /** Finds a User in the database with the specified phone number.
     *
-    * @param phoneNumber - the user's phoneNumber
+    * @param phoneNumber - the user's phone number
     * @return A Future Option of a User with the specified phone number
     */
   def findByPhoneNumber(phoneNumber: String): Future[Option[User]] = {
-    val user = BSONDocument("phoneNumber" -> BSONDocument("$eq" -> phoneNumber))
+    val user = BSONDocument("phoneNumber" -> phoneNumber)
     users.find(user).one[User]
   }
+
+  /** Finds a User in the database with the specified phone number or username
+    *
+    * @param phoneNumber - the user's phone number
+    * @param username - the user's unique username
+    * @return A Future Option of a User with the specified phone number or username
+    */
+  def findByPhoneNumberOrUsername(phoneNumber: String, username: String): Future[Option[User]] = {
+    val user = BSONDocument("$or" ->
+      BSONArray(
+        BSONDocument("phoneNumber" -> phoneNumber),
+        BSONDocument("username" -> username)
+      )
+    )
+    users.find(user).one[User]
+  }
+
 
   /** Finds a User in the database with the specified username
     *

@@ -16,11 +16,11 @@ case class User(
   phoneNumber: String,
   updatedAt: Date,
   // optional
-  email: String = null,
-  firstName: String = null,
-  lastName: String = null,
-  location: Point = null,
-  username: String = null
+  email: String = "",
+  firstName: String = "",
+  lastName: String = "",
+  location: Point = Point(0.0, 0.0),
+  username: String = ""
 ) {
   /*require(phoneNumber match {
     case r"\d{10}" => true

@@ -45,4 +45,13 @@ class ValidationServiceSpec extends FlatSpec with Matchers with MockitoSugar {
     val validateResult = testValidationService.validate("password", "password", "1231231234")
     validateResult shouldBe a [None.type]
   }
+  it should "return a None if an existing User has that username (unless the username is the default empty string)" in {
+    testUserService.create("9879879876", "password", "email@email.com", "first", "last", Point(0.0, 0.0), "existingUserName")
+    val validateResult = testValidationService.validate("password", "password", "1234567890", "", "", "", "existingUserName")
+    validateResult shouldBe a [None.type]
+
+    val validateResult2 = testValidationService.validate("password", "password", "1234567890", "", "", "", "")
+    validateResult2 shouldBe a [Some[_]]
+    validateResult2.get shouldBe a [UserData]
+  }
 }
