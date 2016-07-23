@@ -40,10 +40,12 @@ class UserController @Inject()(val messagesApi: MessagesApi, userService: UserSe
       "lastName" -> text,
       "username" -> text
     )(UserData.apply)(UserData.unapply) verifying ("Failed form constraints",
-      fields => fields match { case userData => validationService.validate(userData.password,
-        userData.passwordConfirmation, userData.phoneNumber, userData.email,
-        userData.firstName, userData.lastName, userData.username
-      ).isDefined }
+      fields => fields match { case userData =>
+        validationService.validate(userData.password, userData.passwordConfirmation,
+                                   userData.phoneNumber, userData.email, userData.firstName,
+                                   userData.lastName, userData.username
+                                  ).isDefined 
+      }
     )
   )
 
@@ -73,6 +75,4 @@ class UserController @Inject()(val messagesApi: MessagesApi, userService: UserSe
     val user = Await.result(userService.findByPhoneNumber("5555555555"), Duration.Inf)
     Ok(user.getOrElse("No user match").toString)
   }
-
-  def specTest = true
 }
