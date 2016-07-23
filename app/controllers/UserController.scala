@@ -1,12 +1,17 @@
 package controllers
 
+import models.Point
+import models.User
 import models.UserData
 import services.MongoService
 import services.UserService
+import services.ValidationService
+
+import java.util.Date
 
 import javax.inject.Inject
+import javax.inject.Singleton
 
-import play.api.Configuration
 import play.api.data._
 import play.api.data.Forms._
 import play.api.i18n.I18nSupport
@@ -17,28 +22,25 @@ import play.api.mvc.Results.BadRequest
 import play.api.mvc.Results.Ok
 import play.api.mvc.Results.Redirect
 
-class UserController @Inject()(val messagesApi: MessagesApi, userService: UserService) extends Controller with I18nSupport {
-  def validate(password: String, passwordConfirmation: String, phoneNumber: String,
-        email: Option[String], firstName: Option[String], lastName: Option[String],
-        username: Option[String]) = {
-    password match {
-      case passwordConfirmation =>
-        Some(UserData(password, passwordConfirmation, phoneNumber, email,
-        firstName, lastName, username))
-    }
-  }
+import reactivemongo.bson.BSONDocument
 
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+import scala.concurrent.ExecutionContext.Implicits.global
+
+@Singleton
+class UserController @Inject()(val messagesApi: MessagesApi, userService: UserService) extends Controller with I18nSupport {
   val signUpForm: Form[UserData] = Form(
     mapping(
       "password" -> nonEmptyText(8, Int.MaxValue),
       "passwordConfirmation" -> nonEmptyText(8, Int.MaxValue),
       "phoneNumber" -> nonEmptyText(10, 10),
-      "email" -> optional(email),
-      "firstName" -> optional(text),
-      "lastName" -> optional(text),
-      "username" -> optional(text)
+      "email" -> text,//email,
+      "firstName" -> text,
+      "lastName" -> text,
+      "username" -> text
     )(UserData.apply)(UserData.unapply) verifying ("Failed form constraints",
-      fields => fields match { case userData => validate(userData.password,
+      fields => fields match { case userData => ValidationService.validate(userData.password,
         userData.passwordConfirmation, userData.phoneNumber, userData.email,
         userData.firstName, userData.lastName, userData.username
       ).isDefined }
@@ -53,9 +55,9 @@ class UserController @Inject()(val messagesApi: MessagesApi, userService: UserSe
       },
       userData => {
         // binding success, form is bound successfully
-        //userService.create(userData.phoneNumber, userData.password, userData.email,
-        //      userData.firstName, userData.lastName, None, userData.username)
-        Redirect(routes.HomeController.index)
+        userService.create(userData.phoneNumber, userData.password, userData.email,
+              userData.firstName, userData.lastName, null, userData.username)
+        Redirect(routes.HomeController.index).flashing("success" -> "User created")
       }
     )
   }
@@ -63,4 +65,13 @@ class UserController @Inject()(val messagesApi: MessagesApi, userService: UserSe
   def signup = Action {
     Ok(views.html.signup(signUpForm))
   }
+
+  def testFind = Action {
+    //val testUser = User(new Date, "password", "5555555555", new Date, "email@email.com", "taylor", "ninesling", Point(35.0, 45.0), "t9sling")
+    //userService.create(testUser)
+    val user = Await.result(userService.findByPhoneNumber("5555555556"), Duration.Inf)
+    Ok(user.getOrElse("No user match").toString)
+  }
+
+  def specTest = true
 }

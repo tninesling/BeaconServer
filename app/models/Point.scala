@@ -21,7 +21,7 @@ object Point {
         lat <- coords.getAs[Double](1)
       } yield new Point(lat, lon)
 
-      opt.get
+      opt.getOrElse(null)
     }
   }
 

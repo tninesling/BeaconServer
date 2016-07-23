@@ -16,37 +16,36 @@ case class User(
   phoneNumber: String,
   updatedAt: Date,
   // optional
-  email: Option[String] = None,
-  firstName: Option[String] = None,
-  lastName: Option[String] = None,
-  location: Option[Point] = None,
-  username: Option[String] = None
+  email: String = null,
+  firstName: String = null,
+  lastName: String = null,
+  location: Point = null,
+  username: String = null
 ) {
-  /*val phoneNumberAcceptPattern = """\d{10}""".r
-  require(phoneNumber match {
-    case phoneNumberAcceptPattern => true
+  /*require(phoneNumber match {
+    case r"\d{10}" => true
     case _ => false
   })*/
-  require(phoneNumber.matches("\\d{10}"))
+  require(phoneNumber.trim.matches("\\d{10}"))
 }
 
 object User {
   implicit object UserReader extends BSONDocumentReader[User] {
-    def read(doc: BSONDocument): User = {
+    override def read(doc: BSONDocument): User = {
       val opt: Option[User] = for {
         createdAt <- doc.getAs[Date]("createdAt")
         passwordDigest <- doc.getAs[String]("passwordDigest")
         phoneNumber <- doc.getAs[String]("phoneNumber")
         updatedAt <- doc.getAs[Date]("updatedAt")
-        email <- doc.getAs[String]("email").map(Option(_))
-        firstName <- doc.getAs[String]("firstName").map(Option(_))
-        lastName <- doc.getAs[String]("lastName").map(Option(_))
-        location <- doc.getAs[Point]("location").map(Option(_))
-        username <- doc.getAs[String]("username").map(Option(_))
+        email <- doc.getAs[String]("email")
+        firstName <- doc.getAs[String]("firstName")
+        lastName <- doc.getAs[String]("lastName")
+        location <- doc.getAs[Point]("location")
+        username <- doc.getAs[String]("username")
       } yield User(createdAt, passwordDigest, phoneNumber, updatedAt, email,
               firstName, lastName, location, username)
 
-      opt.get
+      opt.getOrElse(null)
     }
   }
 

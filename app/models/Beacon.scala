@@ -37,7 +37,7 @@ object Beacon {
       } yield Beacon(address, creator, endTime, location, notifiedCount,
                      notifiedUsers, placeName, range, startTime, tags, title)
 
-      opt.get
+      opt.getOrElse(null)
     }
   }
 

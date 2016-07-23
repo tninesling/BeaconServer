@@ -5,8 +5,10 @@ import play.api.mvc.Action
 import play.api.mvc.Controller
 
 import javax.inject.Inject
+import javax.inject.Singleton
 
-class HomeController @Inject()() extends Controller {
+@Singleton
+class HomeController @Inject()(config: Configuration) extends Controller {
   def index() = Action {
     Ok(views.html.index("Hello"))
   }

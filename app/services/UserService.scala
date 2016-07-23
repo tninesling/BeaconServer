@@ -6,6 +6,7 @@ import models.User
 import java.util.Date
 
 import javax.inject.Inject
+import javax.inject.Singleton
 
 import org.mindrot.jbcrypt.BCrypt
 
@@ -26,6 +27,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 /** Provides CRUD operations and authentication for the User model.
   * Authentication is provided by the jBcrypt plugin
   */
+@Singleton
 class UserService @Inject()(config: Configuration, mongo: MongoService) {
   lazy val users = Await.result(mongo.users, Duration.Inf)
 
@@ -58,13 +60,13 @@ class UserService @Inject()(config: Configuration, mongo: MongoService) {
     * @param username - the user's chosen username (optional)
     * @return A Future of the result of the insert
     */
-  def create(phoneNumber: String, password: String, email: Option[String],
-        firstName: Option[String], lastName: Option[String], location: Option[Point],
-        username: Option[String]): Future[WriteResult] = {
+  def create(phoneNumber: String, password: String, email: String = null,
+        firstName: String = null, lastName: String = null, location: Point = null,
+        username: String = null): Future[WriteResult] = {
     val createdAt = new Date // current time
     val hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt)
     val updatedAt = new Date // current time
-    val newUser: User = User(createdAt, phoneNumber, hashedPassword, updatedAt,
+    val newUser: User = User(createdAt, hashedPassword, phoneNumber, updatedAt,
             email, firstName, lastName, location, username)
 
     users.insert(newUser)
@@ -97,13 +99,22 @@ class UserService @Inject()(config: Configuration, mongo: MongoService) {
     users.remove(user)
   }
 
+  /** Find the user inside the database
+    *
+    * @param user - the User to find in the database
+    * @return A Future Option of a User matching user
+    */
+  def find(user: User): Future[Option[User]] = {
+    users.find(user).one[User]
+  }
+
   /** Finds a User in the database with the specified phone number.
     *
     * @param phoneNumber - the user's phoneNumber
     * @return A Future Option of a User with the specified phone number
     */
   def findByPhoneNumber(phoneNumber: String): Future[Option[User]] = {
-    val user = BSONDocument("phoneNumber" -> phoneNumber)
+    val user = BSONDocument("phoneNumber" -> BSONDocument("$eq" -> phoneNumber))
     users.find(user).one[User]
   }
 
@@ -157,5 +168,3 @@ class UserService @Inject()(config: Configuration, mongo: MongoService) {
     users.findAndUpdate(user, newLocation)
   }
 }
-
-object UserService {} // companion object for UserService class. Only one UserService should be used
