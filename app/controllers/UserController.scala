@@ -29,7 +29,7 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
-class UserController @Inject()(val messagesApi: MessagesApi, userService: UserService) extends Controller with I18nSupport {
+class UserController @Inject()(val messagesApi: MessagesApi, userService: UserService, validationService: ValidationService) extends Controller with I18nSupport {
   val signUpForm: Form[UserData] = Form(
     mapping(
       "password" -> nonEmptyText(8, Int.MaxValue),
@@ -40,7 +40,7 @@ class UserController @Inject()(val messagesApi: MessagesApi, userService: UserSe
       "lastName" -> text,
       "username" -> text
     )(UserData.apply)(UserData.unapply) verifying ("Failed form constraints",
-      fields => fields match { case userData => ValidationService.validate(userData.password,
+      fields => fields match { case userData => validationService.validate(userData.password,
         userData.passwordConfirmation, userData.phoneNumber, userData.email,
         userData.firstName, userData.lastName, userData.username
       ).isDefined }

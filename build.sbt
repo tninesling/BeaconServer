@@ -7,6 +7,7 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 scalaVersion := "2.11.7"
 
 libraryDependencies ++= Seq(
+  "com.typesafe" % "config" % "1.3.0",
   "org.mindrot" % "jbcrypt" % "0.3m",
   "org.mockito" % "mockito-all" % "1.10.19",
   "org.reactivemongo" %% "reactivemongo" % "0.11.14",
