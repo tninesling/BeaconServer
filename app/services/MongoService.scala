@@ -14,7 +14,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 @Singleton
 class MongoService @Inject()(config: Configuration) {
   // if no host names found, default to localhost:27017
-  lazy val hostURI = config.getString("localmongodb.server")
+  lazy val hostURI = config.getString("mongodb.server")
                            .getOrElse("localhost:27017")
                            .toString()
 

@@ -67,9 +67,9 @@ class UserController @Inject()(val messagesApi: MessagesApi, userService: UserSe
   }
 
   def testFind = Action {
-    //val testUser = User(new Date, "password", "5555555555", new Date, "email@email.com", "taylor", "ninesling", Point(35.0, 45.0), "t9sling")
-    //userService.create(testUser)
-    val user = Await.result(userService.findByPhoneNumber("5555555556"), Duration.Inf)
+    val testUser = User(new Date, "password", "5555555558", new Date, "email@email.com", "taylor", "ninesling", Point(35.0, 45.0), "t9sling")
+    userService.create(testUser)
+    val user = Await.result(userService.findByPhoneNumber("5555555558"), Duration.Inf)
     Ok(user.getOrElse("No user match").toString)
   }
 
