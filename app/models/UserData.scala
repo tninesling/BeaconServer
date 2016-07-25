@@ -12,4 +12,6 @@ case class UserData(
   firstName: String = "",
   lastName: String = "",
   username: String = ""
-)
+) {
+  require(phoneNumber.matches("\\d{10}"))
+}

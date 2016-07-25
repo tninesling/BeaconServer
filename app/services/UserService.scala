@@ -41,10 +41,15 @@ class UserService @Inject()(config: Configuration, mongo: MongoService) {
     */
   def authenticate(phoneNumber: String, passwordEntry: String): Boolean = {
     val query: BSONDocument = BSONDocument("phoneNumber" -> phoneNumber)
-    val maybeUser: Future[Option[User]] = users.find(query).one[User]
-    val user: User = Await.result(maybeUser, Duration.Inf).get
+    val futureMaybeUser: Future[Option[User]] = users.find(query).one[User]
+    val maybeUser: Option[User] = Await.result(futureMaybeUser, Duration.Inf)
 
-    BCrypt.checkpw(passwordEntry, user.passwordDigest)
+    maybeUser match {
+      case Some(user) =>
+        BCrypt.checkpw(passwordEntry, user.passwordDigest)
+      case None =>
+        false
+    }
   }
 
   /** If the specified user does not already exist, creates a new user and

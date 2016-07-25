@@ -22,11 +22,7 @@ case class User(
   location: Point = Point(0.0, 0.0),
   username: String = ""
 ) {
-  /*require(phoneNumber match {
-    case r"\d{10}" => true
-    case _ => false
-  })*/
-  require(phoneNumber.trim.matches("\\d{10}"))
+  require(phoneNumber.matches("\\d{10}"))
 }
 
 object User {

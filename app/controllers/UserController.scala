@@ -12,8 +12,10 @@ import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
 
-import play.api.data._
-import play.api.data.Forms._
+import play.api.data.Form
+import play.api.data.Forms.mapping
+import play.api.data.Forms.nonEmptyText
+import play.api.data.Forms.text
 import play.api.i18n.I18nSupport
 import play.api.i18n.MessagesApi
 import play.api.mvc.Action
@@ -41,10 +43,10 @@ class UserController @Inject()(val messagesApi: MessagesApi, userService: UserSe
       "username" -> text
     )(UserData.apply)(UserData.unapply) verifying ("Failed form constraints",
       fields => fields match { case userData =>
-        validationService.validate(userData.password, userData.passwordConfirmation,
-                                   userData.phoneNumber, userData.email, userData.firstName,
-                                   userData.lastName, userData.username
-                                  ).isDefined 
+        validationService.validateSignup(userData.password,
+              userData.passwordConfirmation, userData.phoneNumber, userData.email,
+              userData.firstName, userData.lastName, userData.username
+        ).isDefined
       }
     )
   )
