@@ -11,15 +11,13 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 
 import play.api.Configuration
-import play.api.inject.ConfigurationProvider
 
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers
-import org.scalatest.mock.MockitoSugar
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ValidationServiceSpec extends FlatSpec with Matchers with MockitoSugar {
+class ValidationServiceSpec extends FlatSpec with Matchers {
   val config: Config = ConfigFactory.load("test.conf")
   val configuration: Configuration = new Configuration(config)
   val testMongoService = new MongoService(configuration)
@@ -58,20 +56,20 @@ class ValidationServiceSpec extends FlatSpec with Matchers with MockitoSugar {
   }
 
   "The validateLogin method" should "return an instance of Some[LoginData] if phone number is formatted as 10 consecutive digits and the user with that number has that password" in {
-    val validateResult = testValidationService.validateLogin("password", "1231231234")
+    val validateResult = testValidationService.validateLogin("password", "1231231234", false)
     validateResult shouldBe a [Some[_]]
     validateResult.get shouldBe a [LoginData]
   }
   it should "return a None if the phone number is not formatted as 10 consecutive digits" in {
-    val validateResult = testValidationService.validateLogin("password", "123-456-7890")
+    val validateResult = testValidationService.validateLogin("password", "123-456-7890", false)
     validateResult shouldBe a [None.type]
   }
   it should "return a None if there is no user with that phoneNumber" in {
-    val validateResult = testValidationService.validateLogin("password", "0000000000")
+    val validateResult = testValidationService.validateLogin("password", "0000000000", false)
     validateResult shouldBe a [None.type]
   }
   it should "return a None if the password is incorrect" in {
-    val validateResult = testValidationService.validateLogin("notPassword", "1231231234")
+    val validateResult = testValidationService.validateLogin("notPassword", "1231231234", false)
     validateResult shouldBe a [None.type]
   }
 }

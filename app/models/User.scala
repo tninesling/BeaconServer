@@ -11,16 +11,17 @@ import scala.util.matching.Regex
 
 case class User(
   // required
-  createdAt: Date,
-  passwordDigest: String,
   phoneNumber: String,
+  passwordDigest: String,
+  createdAt: Date,
   updatedAt: Date,
   // optional
   email: String = "",
   firstName: String = "",
   lastName: String = "",
   location: Point = Point(0.0, 0.0),
-  username: String = ""
+  username: String = "",
+  rememberDigest: String = ""
 ) {
   require(phoneNumber.matches("\\d{10}"))
 }
@@ -29,17 +30,18 @@ object User {
   implicit object UserReader extends BSONDocumentReader[User] {
     override def read(doc: BSONDocument): User = {
       val opt: Option[User] = for {
-        createdAt <- doc.getAs[Date]("createdAt")
         passwordDigest <- doc.getAs[String]("passwordDigest")
         phoneNumber <- doc.getAs[String]("phoneNumber")
+        createdAt <- doc.getAs[Date]("createdAt")
         updatedAt <- doc.getAs[Date]("updatedAt")
         email <- doc.getAs[String]("email")
         firstName <- doc.getAs[String]("firstName")
         lastName <- doc.getAs[String]("lastName")
         location <- doc.getAs[Point]("location")
         username <- doc.getAs[String]("username")
-      } yield User(createdAt, passwordDigest, phoneNumber, updatedAt, email,
-              firstName, lastName, location, username)
+        rememberDigest <- doc.getAs[String]("rememberDigest")
+      } yield User(phoneNumber, passwordDigest, createdAt, updatedAt, email,
+              firstName, lastName, location, username, rememberDigest)
 
       opt.getOrElse(null)
     }
@@ -47,15 +49,16 @@ object User {
 
   implicit object UserWriter extends BSONDocumentWriter[User] {
     def write(user: User): BSONDocument = BSONDocument(
-      "createdAt" -> user.createdAt,
-      "passwordDigest" -> user.passwordDigest,
       "phoneNumber" -> user.phoneNumber,
+      "passwordDigest" -> user.passwordDigest,
+      "createdAt" -> user.createdAt,
       "updatedAt" -> user.updatedAt,
       "email" -> user.email,
       "firstName" -> user.firstName,
       "lastName" -> user.lastName,
       "location" -> user.location,
-      "username" -> user.username
+      "username" -> user.username,
+      "rememberDigest" -> user.rememberDigest
     )
   }
 }

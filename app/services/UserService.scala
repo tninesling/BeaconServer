@@ -1,5 +1,6 @@
 package services
 
+import helpers.BCryptHelpers
 import models.Point
 import models.User
 
@@ -8,13 +9,6 @@ import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
 
-import org.mindrot.jbcrypt.BCrypt
-
-import play.api.Configuration
-
-import reactivemongo.api.MongoConnection
-import reactivemongo.api.MongoDriver
-import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson.BSONArray
 import reactivemongo.bson.BSONDocument
@@ -29,7 +23,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
   * Authentication is provided by the jBcrypt plugin
   */
 @Singleton
-class UserService @Inject()(config: Configuration, mongo: MongoService) {
+class UserService @Inject()(mongo: MongoService) {
   lazy val users = Await.result(mongo.users, Duration.Inf)
 
   /** Authenticates a user based on a password attempt. Finds the user trying to
@@ -46,7 +40,7 @@ class UserService @Inject()(config: Configuration, mongo: MongoService) {
 
     maybeUser match {
       case Some(user) =>
-        BCrypt.checkpw(passwordEntry, user.passwordDigest)
+        BCryptHelpers.verify(passwordEntry, user.passwordDigest)
       case None =>
         false
     }
@@ -70,9 +64,9 @@ class UserService @Inject()(config: Configuration, mongo: MongoService) {
         firstName: String = "", lastName: String = "", location: Point = Point(0.0, 0.0),
         username: String = ""): Future[WriteResult] = {
     val createdAt = new Date // current time
-    val hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt)
+    val hashedPassword = BCryptHelpers.digest(password)
     val updatedAt = new Date // current time
-    val newUser: User = User(createdAt, hashedPassword, phoneNumber, updatedAt,
+    val newUser: User = User(phoneNumber, hashedPassword, createdAt, updatedAt,
             email, firstName, lastName, location, username)
 
     users.insert(newUser)

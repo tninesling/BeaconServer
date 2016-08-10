@@ -1,6 +1,6 @@
 @(userForm: Form[UserData])(implicit messages: Messages)
 
-@helper.form(action = routes.UserController.userPost) {
+@helper.form(action = routes.UserController.signupPost) {
   @helper.inputText(userForm("phoneNumber"))
   @helper.inputPassword(userForm("password"))
   @helper.inputPassword(userForm("passwordConfirmation"))
@@ -8,5 +8,5 @@
   @helper.inputText(userForm("firstName"))
   @helper.inputText(userForm("lastName"))
   @helper.inputText(userForm("username"))
-  <input type="submit" value="Submit">
+  <input type="submit" value="Submit"/>
 }

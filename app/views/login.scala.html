@@ -1,0 +1,9 @@
+@(loginForm: Form[LoginData])(implicit messages: Messages)
+
+@helper.form(action = routes.SessionController.loginPost) {
+  @helper.inputText(loginForm("phoneNumber"), '_label -> "Phone Number:")
+  @helper.inputPassword(loginForm("password"), '_label -> "Password:")
+  @helper.checkbox(loginForm("remember"), '_label -> "Remember me:")
+  <input type="submit" value="Submit"/>
+  <a href="/signup">New user?</a>
+}

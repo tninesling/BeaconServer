@@ -62,12 +62,12 @@ class ValidationService @Inject()(userService: UserService){
     * @param phoneNumber
     * @return An optional instance of LoginData
     */
-  def validateLogin(password: String, phoneNumber: String): Option[LoginData] = {
+  def validateLogin(password: String, phoneNumber: String, remember: Boolean): Option[LoginData] = {
     phoneNumber.matches("\\d{10}") match {
       case true =>
         userService.authenticate(phoneNumber, password) match {
           case true =>
-            Some(LoginData(password, phoneNumber))
+            Some(LoginData(password, phoneNumber, remember))
           case false =>
             None
         }

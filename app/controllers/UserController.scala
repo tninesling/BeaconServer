@@ -27,6 +27,7 @@ import play.api.mvc.Results.Redirect
 import reactivemongo.bson.BSONDocument
 
 import scala.concurrent.Await
+import scala.concurrent.Future
 import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -51,30 +52,36 @@ class UserController @Inject()(val messagesApi: MessagesApi, userService: UserSe
     )
   )
 
-  def userPost = Action { implicit request =>
-    signUpForm.bindFromRequest.fold(
-      formWithErrors => {
-        // binding failure, form has errors
-        BadRequest(views.html.signup(formWithErrors))
-      },
-      userData => {
-        // binding success, form is bound successfully
-        userService.create(userData.phoneNumber, userData.password, userData.email,
-              userData.firstName, userData.lastName, new Point(0.0, 0.0), userData.username)
-        Redirect(routes.HomeController.index).flashing("success" -> "User created")
-      }
-    )
+  def signup = Action.async {
+    Future {
+      Ok(views.html.signup(signUpForm))
+    }
   }
 
-  def signup = Action {
-    Ok(views.html.signup(signUpForm))
+  def signupPost = Action.async { implicit request =>
+    Future {
+      signUpForm.bindFromRequest.fold(
+        formWithErrors => {
+          // binding failure, return form with errors
+          BadRequest(views.html.signup(formWithErrors))
+        },
+        userData => {
+          // binding success, form is bound successfully
+          userService.create(userData.phoneNumber, userData.password, userData.email,
+                userData.firstName, userData.lastName, new Point(0.0, 0.0), userData.username)
+          Redirect(routes.HomeController.index).withSession("loggedIn" -> "true")
+        }
+      )
+    }
   }
 
-  def testFind = Action {
-    //val testUser = User(new Date, "password", "5555555558", new Date, "email@email.com", "taylor", "ninesling", Point(35.0, 45.0), "t9sling")
-    //userService.create(testUser)
-    userService.create("5555555555", "password", "email@email.com", "first", "last", new Point(0.0, 0.0), "username")
-    val user = Await.result(userService.findByPhoneNumber("5555555555"), Duration.Inf)
-    Ok(user.getOrElse("No user match").toString)
+  def testFind = Action.async {
+    Future {
+      //val testUser = User(new Date, "password", "5555555558", new Date, "email@email.com", "taylor", "ninesling", Point(35.0, 45.0), "t9sling")
+      //userService.create(testUser)
+      userService.create("5555555555", "password", "email@email.com", "first", "last", new Point(0.0, 0.0), "username")
+      val user = Await.result(userService.findByPhoneNumber("5555555555"), Duration.Inf)
+      Ok(user.getOrElse("No user match").toString)
+    }
   }
 }
