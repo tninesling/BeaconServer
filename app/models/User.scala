@@ -13,9 +13,9 @@ case class User(
   // required
   phoneNumber: String,
   passwordDigest: String,
-  createdAt: Date,
-  updatedAt: Date,
   // optional
+  createdAt: Date = new Date,
+  updatedAt: Date = new Date,
   email: String = "",
   firstName: String = "",
   lastName: String = "",
@@ -24,6 +24,7 @@ case class User(
   rememberDigest: String = ""
 ) {
   require(phoneNumber.matches("\\d{10}"))
+  require(!updatedAt.before(createdAt))
 }
 
 object User {

@@ -21,7 +21,7 @@ class ValidationServiceSpec extends FlatSpec with Matchers {
   val config: Config = ConfigFactory.load("test.conf")
   val configuration: Configuration = new Configuration(config)
   val testMongoService = new MongoService(configuration)
-  val testUserService = new UserService(configuration, testMongoService)
+  val testUserService = new UserService(testMongoService)
   val testValidationService = new ValidationService(testUserService)
 
   testUserService.users.drop(false)

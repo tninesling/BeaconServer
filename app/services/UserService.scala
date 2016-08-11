@@ -64,8 +64,8 @@ class UserService @Inject()(mongo: MongoService) {
         firstName: String = "", lastName: String = "", location: Point = Point(0.0, 0.0),
         username: String = ""): Future[WriteResult] = {
     val createdAt = new Date // current time
+    val updatedAt = createdAt // creation time
     val hashedPassword = BCryptHelpers.digest(password)
-    val updatedAt = new Date // current time
     val newUser: User = User(phoneNumber, hashedPassword, createdAt, updatedAt,
             email, firstName, lastName, location, username)
 
