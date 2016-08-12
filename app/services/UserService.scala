@@ -46,9 +46,8 @@ class UserService @Inject()(mongo: MongoService) {
     }
   }
 
-  /** If the specified user does not already exist, creates a new user and
-    * inserts into the database. Phone number and password are the only
-    * required parameters for creating a new user
+  /** Creates a new user and inserts into the database. Phone number and
+    * password are the only required parameters for creating a new user
     *
     * @param phoneNumber - the user's phone number (required)
     * @param password - the user's chosen password, which will be hashed before
