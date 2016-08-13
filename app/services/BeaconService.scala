@@ -11,6 +11,7 @@ import javax.inject.Singleton
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson.BSONArray
 import reactivemongo.bson.BSONDocument
+import reactivemongo.bson.BSONValue
 
 import scala.concurrent.Await
 import scala.concurrent.Future
@@ -79,22 +80,51 @@ class BeaconService @Inject()(mongo: MongoService) {
     beacons.remove(beacon)
   }
 
-  /** Finds maxLimit nearby Beacons within range miles of location
+  /** Finds maxLimit nearby Beacons within range meters of location
     *
     * @param latitude
     * @param longitude
-    * @param range - the radius of the circle to search in miles
+    * @param range - the radius of the circle to search in meters
     * @param maxLimit - the maximum number of Beacons to return
     * @return A List of maxlimit or less Beacons nearby
     */
-  def findNearbyBeacons(latitude: Double, longitude: Double, range: Double, maxLimit: Int): Future[List[Beacon]] = {
+  def findNearbyBeacons(latitude: Double, longitude: Double, range: Long, maxLimit: Int): Future[List[Beacon]] = {
     val geoQuery = BSONDocument("location" -> BSONDocument("$geoWithin" -> BSONDocument(
       "$centerSphere" -> BSONArray(
         BSONArray(longitude, latitude),
-        range/3963.2 // converts from miles to radians
+        range/1609.344/3963.2 // converts from meters to miles to radians
       )
     )))
 
     beacons.find(geoQuery).cursor[Beacon].collect[List](maxLimit)
+  }
+
+  /** Finds a number of Beacons nearby the specified location that have at least
+    * one of the tags in the tagList
+    *
+    * @param latitude - the latitude coordinate of the central point
+    * @param longitude - the longitude coordinate of the central point
+    * @param range - the radius in meters defining the circle around the central point to be searched
+    * @param maxLimit - the maximum number of Beacons to return
+    * @param tagList - a List of tags used to specify the type of event marked by the Beacon
+    * @return A Future of a List of Beacons
+    */
+  def findNearbyBeaconsWithTags(latitude: Double, longitude: Double, range: Long,
+                                maxLimit: Int, tagList: List[String]): Future[List[Beacon]] = {
+    import beacons.BatchCommands.AggregationFramework.{AggregationResult, GeoNear, Match}
+
+    val containsTagsFromTagList = BSONDocument(
+      "$in" -> BSONDocument(
+        "tags" -> tagList
+      )
+    )
+
+    val beaconAggregation: Future[AggregationResult] = beacons.aggregate(
+      GeoNear(true, maxLimit, Some(range), None, None, true,
+              Some(Point(latitude, longitude).asInstanceOf[BSONValue])),
+      List(Match(containsTagsFromTagList))
+    )
+
+    beaconAggregation.map(_.head[Beacon])
   }
 }

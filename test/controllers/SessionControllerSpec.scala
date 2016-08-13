@@ -28,7 +28,7 @@ class SessionControllerSpec extends FlatSpec with Matchers with MockitoSugar {
                                                     mockUserService,
                                                     mockValidationService)
 
-  "A token" should "have at least 10 characters" in {
-    testSessionController.newToken.length should be >= 10
+  "A token" should "have at least 5 characters" in {
+    testSessionController.newToken.length should be >= 5
   }
 }
