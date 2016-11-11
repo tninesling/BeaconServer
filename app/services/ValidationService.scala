@@ -1,7 +1,7 @@
 package services
 
+import models.BeaconData
 import models.LoginData
-import models.User
 import models.UserData
 
 import javax.inject.Inject
@@ -74,5 +74,12 @@ class ValidationService @Inject()(userService: UserService){
       case false =>
         None
     }
+  }
+
+  def validateCreateBeacon(creator: String, latitude: Double, longitude: Double,
+          title: String, address: String, venueName: String, startTime: Date,
+          endTime: Date, range: Double, tags: List[String]): Option[BeaconData] = {
+    Some(BeaconData(creator, latitude, longitude, title, address, venueName,
+            startTime, endTime, range, tags))
   }
 }

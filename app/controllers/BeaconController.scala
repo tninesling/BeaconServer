@@ -1,7 +1,13 @@
 package controllers
 
 import models.Beacon
+import models.BeaconData
 
+import play.api.data.Forms.bigDecimal
+import play.api.data.Forms.date
+import play.api.data.Forms.list
+import play.api.data.Forms.nonEmptyText
+import play.api.data.Forms.text
 import play.api.Configuration
 import play.api.libs.json.JsValue
 import play.api.mvc.Action
@@ -29,4 +35,50 @@ class BeaconController @Inject()(config: Configuration) extends Controller {
       val creator = json \ "creator"
     }
   }*/
+
+  val createBeaconForm: Form[BeaconData] = Form(
+    mapping(
+      "creator" -> nonEmptyText,
+      "latitude" -> bigDecimal,
+      "longitude" -> bigDecimal,
+      "title" -> text,
+      "address" -> text,
+      "venueName" -> text,
+      "startTime" -> date,
+      "endTime" -> date,
+      "range" -> bigDecimal,
+      "tags" -> list(text)
+    )(BeaconData.apply)(BeaconData.unapply) verifying ("Failed form constraints",
+      fields => fields match { case userData =>
+        validationService.validateSignup(userData.password,
+              userData.passwordConfirmation, userData.phoneNumber, userData.email,
+              userData.firstName, userData.lastName, userData.username
+        ).isDefined
+      }
+    )
+  )
+
+  def signup = Action.async {
+    Future {
+      Ok(views.html.signup(signUpForm))
+    }
+  }
+
+  def signupPost = Action.async { implicit request =>
+    Future {
+      signUpForm.bindFromRequest.fold(
+        formWithErrors => {
+          // binding failure, return form with errors
+          BadRequest(views.html.signup(formWithErrors))
+        },
+        userData => {
+          // binding success, form is bound successfully
+          userService.create(userData.phoneNumber, userData.password, userData.email,
+                userData.firstName, userData.lastName, new Point(0.0, 0.0), userData.username)
+          Redirect(routes.HomeController.index).withSession("loggedIn" -> "true")
+        }
+      )
+    }
+  }
+
 }

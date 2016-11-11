@@ -114,8 +114,8 @@ class BeaconService @Inject()(mongo: MongoService) {
     import beacons.BatchCommands.AggregationFramework.{AggregationResult, GeoNear, Match}
 
     val containsTagsFromTagList = BSONDocument(
-      "$in" -> BSONDocument(
-        "tags" -> tagList
+      "tags" -> BSONDocument(
+        "$in" -> tagList
       )
     )
 
@@ -126,5 +126,23 @@ class BeaconService @Inject()(mongo: MongoService) {
     )
 
     beaconAggregation.map(_.head[Beacon])
+  }
+
+  def updateStringFields(creator: String, time: Date, updates: (String, String)*): Future[beacons.BatchCommands.FindAndModifyCommand.FindAndModifyResult] = {
+    val beacon = BSONDocument(
+      "creator" -> creator,
+      "startTime" -> BSONDocument("$lt" -> time),
+      "endTime" -> BSONDocument("$gt" -> time)
+    )
+
+    val updatesMap = updates.map {
+      update => BSONDocument(update._1 -> update._2)
+    }
+
+    val bsonUpdates: BSONDocument = updatesMap.tail.foldLeft(updatesMap.head)(
+      (item1: BSONDocument, item2: BSONDocument) => item1.add(item2)
+    )
+
+    beacons.findAndUpdate(beacon, bsonUpdates)
   }
 }
